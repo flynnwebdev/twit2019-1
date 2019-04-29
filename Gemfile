@@ -67,3 +67,6 @@ gem "devise", "~> 4.6"
 gem "rolify", "~> 5.2"
 
 gem "image_processing", "~> 1.9"
+
+gem "cloudinary", require: false
+gem "activestorage-cloudinary-service", "~> 0.2.3"
