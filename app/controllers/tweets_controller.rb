@@ -1,7 +1,8 @@
 class TweetsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_tweet, only: [:show, :edit, :update, :destroy]
-  before_action :check_owner, only: [:edit, :destroy, :update]
+  before_action :check_edit, only: [:edit, :update]
+  before_action :check_destroy, only: [:destroy]
 
   # GET /tweets
   # GET /tweets.json
@@ -29,6 +30,7 @@ class TweetsController < ApplicationController
   def create
     @tweet = Tweet.new(tweet_params)
     @tweet.user = current_user
+    @tweet.image.attach(tweet_params[:image])
 
     respond_to do |format|
       if @tweet.save
@@ -72,15 +74,22 @@ class TweetsController < ApplicationController
       @tweet = Tweet.find(params[:id])
     end
 
-    def check_owner
-        if current_user != @tweet.user
-          flash[:alert] = "You cannot modify that tweet!"
+    def check_edit
+        if !@tweet.can_edit?(current_user)
+          flash[:alert] = "You cannot edit that tweet!"
+          redirect_to(request.referrer)
+        end
+      end
+
+    def check_destroy
+        if !@tweet.can_destroy?(current_user)
+          flash[:alert] = "You cannot destroy that tweet!"
           redirect_to(request.referrer)
         end
       end
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def tweet_params
-      params.require(:tweet).permit(:title, :content)
+      params.require(:tweet).permit(:title, :content, :image)
     end
 end
