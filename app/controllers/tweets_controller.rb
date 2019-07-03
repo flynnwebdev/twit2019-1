@@ -3,35 +3,35 @@ class TweetsController < ApplicationController
   before_action :set_tweet, only: [:show, :edit, :update, :destroy]
   before_action :check_edit, only: [:edit, :update]
   before_action :check_destroy, only: [:destroy]
-
+  
   # GET /tweets
   # GET /tweets.json
   def index
     @tweets = Tweet.all
   end
-
+  
   # GET /tweets/1
   # GET /tweets/1.json
   def show
   end
-
+  
   # GET /tweets/new
   def new
     @tweet = Tweet.new
   end
-
+  
   # GET /tweets/1/edit
   def edit
     
   end
-
+  
   # POST /tweets
   # POST /tweets.json
   def create
     @tweet = Tweet.new(tweet_params)
     @tweet.user = current_user
     @tweet.image.attach(tweet_params[:image])
-
+    
     respond_to do |format|
       if @tweet.save
         format.html { redirect_to @tweet, notice: 'Tweet was successfully created.' }
@@ -42,7 +42,7 @@ class TweetsController < ApplicationController
       end
     end
   end
-
+  
   # PATCH/PUT /tweets/1
   # PATCH/PUT /tweets/1.json
   def update
@@ -57,7 +57,7 @@ class TweetsController < ApplicationController
       end
     end
   end
-
+  
   # DELETE /tweets/1
   # DELETE /tweets/1.json
   def destroy
@@ -67,29 +67,29 @@ class TweetsController < ApplicationController
       format.json { head :no_content }
     end
   end
-
+  
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_tweet
-      @tweet = Tweet.find(params[:id])
+  # Use callbacks to share common setup or constraints between actions.
+  def set_tweet
+    @tweet = Tweet.find(params[:id])
+  end
+  
+  def check_edit
+    if !@tweet.can_edit?(current_user)
+      flash[:alert] = "You cannot edit that tweet!"
+      redirect_to(request.referrer)
     end
-
-    def check_edit
-        if !@tweet.can_edit?(current_user)
-          flash[:alert] = "You cannot edit that tweet!"
-          redirect_to(request.referrer)
-        end
-      end
-
-    def check_destroy
-        if !@tweet.can_destroy?(current_user)
-          flash[:alert] = "You cannot destroy that tweet!"
-          redirect_to(request.referrer)
-        end
-      end
-
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def tweet_params
-      params.require(:tweet).permit(:title, :content, :image)
+  end
+  
+  def check_destroy
+    if !@tweet.can_destroy?(current_user)
+      flash[:alert] = "You cannot destroy that tweet!"
+      redirect_to(request.referrer)
     end
+  end
+  
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def tweet_params
+    params.require(:tweet).permit(:title, :content, :image)
+  end
 end
